@@ -1,3 +1,4 @@
 watchdog
 aiohttp
 aioredis
+simplejson
