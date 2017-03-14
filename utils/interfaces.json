@@ -1,0 +1,42 @@
+{
+  "threads": {
+    "details": {
+      "method": "GET",
+      "required": [
+        "thread"
+      ],
+      "formats": [
+        "json"
+      ]
+    }
+  },
+  "posts": {
+    "list": {
+      "required": [],
+      "method": "GET",
+      "formats": [
+        "json"
+      ]
+    },
+    "create": {
+      "required": [
+        "message"
+      ],
+      "method": "POST",
+      "formats": [
+        "json"
+      ]
+    }
+  },
+  "forums": {
+    "listPosts": {
+      "required": [
+        "forum"
+      ],
+      "method": "GET",
+      "formats": [
+        "json"
+      ]
+    }
+  }
+}

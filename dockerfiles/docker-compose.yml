@@ -1,0 +1,16 @@
+redis:
+    image: redis
+    volumes:
+        - /home/chiaki/Public/data:/data
+    ports:
+        - "127.0.0.1:6379:6379"
+
+disqus:
+    image: disqus/server:alpha
+    volumes:
+        - /path/to/code:/code
+    links:
+        - redis:redis
+    ports:
+        - "127.0.0.1:1065:1065"
+    command: bash /code/dockerfiles/run.sh
