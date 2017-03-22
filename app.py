@@ -116,7 +116,7 @@ async def logger_middleware(app, handler):
     async def middleware_handler(request):
         if '.ico' not in request.path:
             logging.info(
-                f'Path:({request.path})::Method:({request.method})::User-Agent:({request.cookies["User-Agent"]})::Referer:({request.cookies["Referer"]})')
+                f'Path:({request.path})::Method:({request.method})::User-Agent:({request.headers["User-Agent"]})::Referer:({request.headers["Referer"]})')
         response = await handler(request)
         return response
     return middleware_handler
