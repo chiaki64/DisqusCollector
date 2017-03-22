@@ -115,8 +115,8 @@ class SyncView(AbsView):
 async def logger_middleware(app, handler):
     async def middleware_handler(request):
         # if '.ico' not in request.path:
-        logging.info(
-                f'Path:({request.path})::Method:({request.method})::User-Agent:({request.headers["User-Agent"]})::Referer:({request.headers.get("Referer")})')
+        # logging.info(
+        #         f'Path:({request.path})::Method:({request.method})::User-Agent:({request.headers["User-Agent"]})::Referer:({request.headers.get("Referer")})')
         response = await handler(request)
         return response
     return middleware_handler
