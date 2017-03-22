@@ -93,12 +93,10 @@ class Resource:
         # _format = kwargs.pop('format', api.format)
 
         path = HOST + f'api/{version}/{endpoint}.json'
-        print('kw1->', kwargs)
         if 'api_secret' not in kwargs and api.secret_key:
             kwargs['api_secret'] = api.secret_key
         if 'api_public' not in kwargs and api.public_key and 'api_key' not in kwargs:
             kwargs['api_key'] = api.public_key
-            print('kw2->', kwargs)
 
         params = []
         for k, v in kwargs.items():

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import aiohttp
 import asyncio
 import aioredis
 import logging
@@ -16,9 +17,13 @@ from config import (SECRET_KEY,
 logging.basicConfig(
     filename='access.log',
     level=logging.INFO,
-    format='%(asctime)s::%(levelname)s::%(message)s',
+    # format='%(asctime)s::%(levelname)s::%(message)s',
+    format='%(message)s',
     datefmt='%a, %Y/%m/%d %H:%M:%S',
 )
+logger = logging.getLogger('aiohttp.access')
+logger.setLevel(logging.INFO)
+
 disqus = DisqusAPI(SECRET_KEY, PUBLIC_KEY)
 
 
@@ -107,19 +112,22 @@ class RecentView(AbsView):
         return web.json_response(posts.response)
 
 
-class SyncView(AbsView):
-    async def get(self):
-        pass
+# class SyncView(AbsView):
+#     async def get(self):
+#         return web.json_response(
+#             {'message': 'hello, world!'}
+#         )
 
 
-async def logger_middleware(app, handler):
-    async def middleware_handler(request):
-        # if '.ico' not in request.path:
-        # logging.info(
-        #         f'Path:({request.path})::Method:({request.method})::User-Agent:({request.headers["User-Agent"]})::Referer:({request.headers.get("Referer")})')
-        response = await handler(request)
-        return response
-    return middleware_handler
+# async def logger_middleware(app, handler):
+#     async def middleware_handler(request):
+#         print(dir(request))
+#         response = await handler(request)
+#         #     logger.info(
+#         #         f'Method:({request.method})::Status:({response.status})::Path:({request.path+request.query_string})::Status:(%s)::User-Agent:({request.headers["User-Agent"]})::Referer:({request.headers.get("Referer")})'
+#         #     )
+#         return response
+#     return middleware_handler
 
 async def init(loop):
     if DEV:
@@ -127,7 +135,7 @@ async def init(loop):
     else:
         redis_ip = os.environ["REDIS_PORT_6379_TCP_ADDR"]
 
-    app = web.Application(loop=loop, middlewares=[logger_middleware])
+    app = web.Application(loop=loop, middlewares=[])
 
     redis = await aioredis.create_redis((redis_ip, '6379'), loop=loop)
     app.redis = RedisFilter(redis)
@@ -137,7 +145,8 @@ async def init(loop):
     app.router.add_route('*', '/recent', RecentView)
     # app.router.add_get('/sync', SyncView)
 
-    _handler = app.make_handler()
+    _handler = app.make_handler(access_log=logger,
+                                access_log_format='%t::Status(%s)::%Tf::%{X-Real-IP}i::Referer("%{Referer}i")::User-Agent("%{User-Agent}i")') # NOne
     await loop.create_server(_handler, '0.0.0.0', PORT)
     return _handler, app
 
