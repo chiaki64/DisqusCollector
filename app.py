@@ -4,6 +4,7 @@
 import os
 import asyncio
 import aioredis
+import logging
 from aiohttp import web
 from utils.redis import RedisFilter
 from utils.disqus import DisqusAPI
@@ -12,6 +13,12 @@ from config import (SECRET_KEY,
                     SHORT_NAME,
                     PORT, DEV)
 
+logging.basicConfig(
+    filename='access.log',
+    level=logging.INFO,
+    format='%(asctime)s::%(levelname)s::%(message)s',
+    datefmt='%a, %Y/%m/%d %H:%M:%S',
+)
 disqus = DisqusAPI(SECRET_KEY, PUBLIC_KEY)
 
 
@@ -104,6 +111,13 @@ class SyncView(AbsView):
     async def get(self):
         pass
 
+
+async def logger_middleware(app, handler):
+    async def middleware_handler(request):
+        logging.info(f'Path:({request.path})::Method:({request.method})::User-Agent:({request.cookies["User-Agent"]})::Referer:({request.cookies["Referer"]})')
+        response = await handler(request)
+        return response
+    return middleware_handler
 
 async def init(loop):
     if DEV:
