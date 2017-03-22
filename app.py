@@ -114,7 +114,9 @@ class SyncView(AbsView):
 
 async def logger_middleware(app, handler):
     async def middleware_handler(request):
-        logging.info(f'Path:({request.path})::Method:({request.method})::User-Agent:({request.cookies["User-Agent"]})::Referer:({request.cookies["Referer"]})')
+        if '.ico' not in request.path:
+            logging.info(
+                f'Path:({request.path})::Method:({request.method})::User-Agent:({request.cookies["User-Agent"]})::Referer:({request.cookies["Referer"]})')
         response = await handler(request)
         return response
     return middleware_handler
@@ -125,7 +127,7 @@ async def init(loop):
     else:
         redis_ip = os.environ["REDIS_PORT_6379_TCP_ADDR"]
 
-    app = web.Application(loop=loop)
+    app = web.Application(loop=loop, middlewares=[logger_middleware])
 
     redis = await aioredis.create_redis((redis_ip, '6379'), loop=loop)
     app.redis = RedisFilter(redis)
