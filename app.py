@@ -146,7 +146,7 @@ async def init(loop):
     # app.router.add_get('/sync', SyncView)
 
     _handler = app.make_handler(access_log=logger,
-                                access_log_format='%t::Status(%s)::%Tf::%{X-Real-IP}i::Referer("%{Referer}i")::User-Agent("%{User-Agent}i")') # NOne
+                                access_log_format='%t::Request(%r)::Status(%s)::Time(%Tf)::IP(%{X-Real-IP}i)::Referer(%{Referer}i)::User-Agent(%{User-Agent}i)') # NOne
     await loop.create_server(_handler, '0.0.0.0', PORT)
     return _handler, app
 
