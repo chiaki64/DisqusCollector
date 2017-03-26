@@ -139,6 +139,8 @@ class DisqusAPI(Resource):
         if not public_key:
             warnings.warn('You should pass ``public_key`` in addition to your secret key.')
         self.version = version
+        if kwargs['parent'] is None:
+            del kwargs['parent']
         super(DisqusAPI, self).__init__(self)
 
     def _request(self, **kwargs):
