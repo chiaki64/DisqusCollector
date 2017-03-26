@@ -100,11 +100,15 @@ class Resource:
 
         params = []
         for k, v in kwargs.items():
+            print(k, v)
             if isinstance(v, (list, tuple)):
                 for val in v:
                     params.append((k, val))
             else:
-                params.append((k, v))
+                if k == 'parent' and v is None:
+                    pass
+                else:
+                    params.append((k, v))
 
         headers = {
             'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
@@ -139,8 +143,6 @@ class DisqusAPI(Resource):
         if not public_key:
             warnings.warn('You should pass ``public_key`` in addition to your secret key.')
         self.version = version
-        if 'parent' in kwargs and kwargs['parent'] is None:
-            del kwargs['parent']
         super(DisqusAPI, self).__init__(self)
 
     def _request(self, **kwargs):
