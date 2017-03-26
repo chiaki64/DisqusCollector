@@ -88,19 +88,16 @@ class CommentView(AbsView):
                 {'msg': 'error'},
                 status=400
             )
-        request = dict(
+
+        res = await disqus.get(
+            'posts.create',
             method='POST',
             thread=thread['id'],
             author_email=data['email'],
             author_name=data['name'],
             message=data['message'],
+            parent=data.get('parent', ''),
             api_key='E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F'
-        )
-        if data.get('parent', None):
-            request['parent'] = data['parent']
-        res = await disqus.get(
-            'posts.create',
-            request
         )
         return web.json_response(res)
 
