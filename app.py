@@ -95,7 +95,7 @@ class CommentView(AbsView):
             author_email=data['email'],
             author_name=data['name'],
             message=data['message'],
-            parent=data.get('parent', None),
+            parent=data.get('parent', 'null'),
             api_key='E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F'
         )
         return web.json_response(res)
