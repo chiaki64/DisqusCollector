@@ -24,7 +24,7 @@ class RedisFilter:
 
     async def list(self, table):
         data = []
-        array = await self._connection.keys(self.prefix(table) + '*')
+        array = await self._connection.keys(self.prefix(table) + '.*')
         for item in array:
             _id = str(item, encoding='utf-8')[len(self.prefix(table)) + 1:]
             value = await self.get(table, _id)
