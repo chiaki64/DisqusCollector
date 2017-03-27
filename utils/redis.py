@@ -18,7 +18,7 @@ class RedisFilter:
         return id
 
     async def get(self, table, id):
-        key = self.prefix(table) + id
+        key = f'{self.prefix(table)}.{id}'
         value = await self._connection.get(key)
         return None if value is None else pickle.loads(value)
 
