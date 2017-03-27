@@ -55,7 +55,7 @@ class CommentView(AbsView):
         timestamp = int(time.time())
         if comment is not None:
             if timestamp - comment['time'] < 10:
-                return comment
+                return web.json_response(comment)
 
         thread = await disqus.get(
             'threads.details',
