@@ -54,6 +54,7 @@ class CommentView(AbsView):
         comment = await self.redis.get('Comment', id=url)
         timestamp = int(time.time())
         if comment is not None:
+            print(f'ts:{timestamp}, type:{type(timestamp)};ct:{comment["time"]}, type:{type(comment["time"])}')
             if timestamp - comment['time'] < 10:
                 return web.json_response(comment)
 
