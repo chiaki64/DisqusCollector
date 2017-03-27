@@ -54,34 +54,37 @@ class CommentView(AbsView):
         comment = await self.redis.get('Comment', id=url)
         timestamp = int(time.time())
         if comment is not None:
-            logger.warning(f'ts:{timestamp}, type:{type(timestamp)};ct:{comment["time"]}, type:{type(comment["time"])}')
             if timestamp - comment['time'] < 10:
                 return web.json_response(comment)
-
-        thread = await disqus.get(
-            'threads.details',
-            method='GET',
-            forum=SHORT_NAME,
-            thread=f'link:{url}'
-        )
-        if thread.get('id') is None:
-            return web.json_response(
-                {'msg': 'error'},
-                status=400
+        try:
+            thread = await disqus.get(
+                'threads.details',
+                method='GET',
+                forum=SHORT_NAME,
+                thread=f'link:{url}'
             )
-        posts = await disqus.get(
-            'posts.list',
-            method='GET',
-            forum=SHORT_NAME,
-            thread=thread['id']
-        )
+            if thread.get('id') is None:
+                return web.json_response(
+                    {'msg': 'error'},
+                    status=400
+                )
+            posts = await disqus.get(
+                'posts.list',
+                method='GET',
+                forum=SHORT_NAME,
+                thread=thread['id']
+            )
+        except:
+            return comment
         await self.redis.set('Comment', {
             'data': posts.response,
-            'time': int(time.time())
+            'time': int(time.time()),
+            'link': url
         }, id=url)
         return web.json_response({
             'data': posts.response,
-            'time': int(time.time())
+            'time': int(time.time()),
+            'link': url
         })
 
     async def post(self):
@@ -151,7 +154,7 @@ async def init(loop):
     app.router.add_get('/sync', SyncView)
 
     _handler = app.make_handler(access_log=logger,
-                                access_log_format='%t::Request(%r)::Status(%s)::Time(%Tf)::IP(%{X-Real-IP}i)::Referer(%{Referer}i)::User-Agent(%{User-Agent}i)') # NOne
+                                access_log_format='%t::Request(%r)::Status(%s)::Time(%Tf)::IP(%{X-Real-IP}i)::Referer(%{Referer}i)::User-Agent(%{User-Agent}i)')  # NOne
     await loop.create_server(_handler, '0.0.0.0', PORT)
     return _handler, app
 
