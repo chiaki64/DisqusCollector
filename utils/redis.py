@@ -22,6 +22,15 @@ class RedisFilter:
         value = await self._connection.get(key)
         return None if value is None else pickle.loads(value)
 
+    async def list(self, table):
+        data = []
+        array = await self._connection.keys(self.prefix(table) + '*')
+        for item in array:
+            _id = str(item, encoding='utf-8')[len(self.prefix(table)) + 1:]
+            value = await self.get(table, _id)
+            data.append(value)
+        return data
+
     @staticmethod
     def prefix(table):
         return f'{REDIS_NAME}:{table}'

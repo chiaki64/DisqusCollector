@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import os
-import aiohttp
 import asyncio
 import aioredis
 import logging
+import time
 from aiohttp import web
 from utils.redis import RedisFilter
 from utils.disqus import DisqusAPI
@@ -50,6 +50,13 @@ class CommentView(AbsView):
                 {'msg': 'error'},
                 status=400
             )
+
+        comment = await self.redis.get('Comment', id=url)
+        timestamp = int(time.time())
+        if comment is not None:
+            if comment['time'] - timestamp < 10:
+                return comment
+
         thread = await disqus.get(
             'threads.details',
             method='GET',
@@ -67,7 +74,10 @@ class CommentView(AbsView):
             forum=SHORT_NAME,
             thread=thread['id']
         )
-        await self.redis.set('Comment', posts.response, id=str(thread['id']))
+        await self.redis.set('Comment', {
+            'data': posts.response,
+            'time': int(time.time())
+        }, id=url)
         return web.json_response(posts.response)
 
     async def post(self):
@@ -114,22 +124,10 @@ class RecentView(AbsView):
         return web.json_response(posts.response)
 
 
-# class SyncView(AbsView):
-#     async def get(self):
-#         return web.json_response(
-#             {'message': 'hello, world!'}
-#         )
-
-
-# async def logger_middleware(app, handler):
-#     async def middleware_handler(request):
-#         print(dir(request))
-#         response = await handler(request)
-#         #     logger.info(
-#         #         f'Method:({request.method})::Status:({response.status})::Path:({request.path+request.query_string})::Status:(%s)::User-Agent:({request.headers["User-Agent"]})::Referer:({request.headers.get("Referer")})'
-#         #     )
-#         return response
-#     return middleware_handler
+class SyncView(AbsView):
+    async def get(self):
+        data = await self.redis.list('Comment')
+        return data
 
 async def init(loop):
     if DEV:
@@ -145,7 +143,7 @@ async def init(loop):
     app.router.add_get('/', IndexView)
     app.router.add_route('*', '/comment', CommentView)
     app.router.add_route('*', '/recent', RecentView)
-    # app.router.add_get('/sync', SyncView)
+    app.router.add_get('/sync', SyncView)
 
     _handler = app.make_handler(access_log=logger,
                                 access_log_format='%t::Request(%r)::Status(%s)::Time(%Tf)::IP(%{X-Real-IP}i)::Referer(%{Referer}i)::User-Agent(%{User-Agent}i)') # NOne
