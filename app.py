@@ -78,7 +78,10 @@ class CommentView(AbsView):
             'data': posts.response,
             'time': int(time.time())
         }, id=url)
-        return web.json_response(posts.response)
+        return web.json_response({
+            'data': posts.response,
+            'time': int(time.time())
+        })
 
     async def post(self):
         data = dict({}, **await self.request.post())
