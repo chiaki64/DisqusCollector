@@ -54,7 +54,7 @@ class CommentView(AbsView):
         comment = await self.redis.get('Comment', id=url)
         timestamp = int(time.time())
         if comment is not None:
-            if comment['time'] - timestamp < 10:
+            if timestamp - comment['time'] < 10:
                 return comment
 
         thread = await disqus.get(
