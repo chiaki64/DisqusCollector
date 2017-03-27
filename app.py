@@ -75,7 +75,7 @@ class CommentView(AbsView):
                 thread=thread['id']
             )
         except:
-            return comment
+            return web.json_response(comment)
         await self.redis.set('Comment', {
             'data': posts.response,
             'time': int(time.time()),
