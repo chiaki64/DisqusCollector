@@ -127,7 +127,8 @@ class RecentView(AbsView):
 class SyncView(AbsView):
     async def get(self):
         data = await self.redis.list('Comment')
-        return data
+        return web.json_response(data)
+
 
 async def init(loop):
     if DEV:
